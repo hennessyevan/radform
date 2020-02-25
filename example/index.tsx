@@ -1,22 +1,25 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import { useFormBuilder } from '../.'
+import { useFormBuilder, Fields } from '../.'
+import './styles.css'
 
 const App = () => {
-  const [Fields, builder] = useFormBuilder()
+  const builder = useFormBuilder({
+    initialFields: [
+      {
+        tagName: 'text',
+        properties: {
+          label: 'Text Field',
+        },
+      },
+    ],
+  })
 
   return (
     <div>
-      <button onClick={() => builder.add('text', { placeholder: 'Text' })}>Add Text Input</button>
-      <button onClick={() => builder.add('button', { children: 'Button' })}>Add Button</button>
-      <button onClick={() => builder.add('checkbox', { label: 'Checkbox' })}>Add Checkbox</button>
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        <Fields />
+      <button onClick={() => builder.add('button', null, 'Button')}>Add Button</button>
+      <div className="fields">
+        <Fields {...builder} />
       </div>
       <pre>{builder.toJSON(true)}</pre>
     </div>

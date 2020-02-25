@@ -37,6 +37,8 @@
     "typescript": "^3.8.2"
   },
   "dependencies": {
+    "immer": "^5.3.6",
+    "react-sortablejs": "^2.0.11",
     "uuid": "^3.4.0"
   }
 }
