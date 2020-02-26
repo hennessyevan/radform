@@ -1,27 +1,34 @@
-import * as React from 'react'
-import * as ReactDOM from 'react-dom'
-import { useFormBuilder, Fields } from '../.'
+import React from 'react'
+import ReactDOM from 'react-dom'
+import { RadField, RadForm, Debugger, Preview } from '../.'
 import './styles.css'
 
-const App = () => {
-  const builder = useFormBuilder({
-    initialFields: [
-      {
-        tagName: 'text',
-        properties: {
-          label: 'Text Field',
-        },
-      },
-    ],
-  })
+const TextInput = () => (
+  <RadField
+    name="text"
+    preview={({ name, setPropertyValue, properties }) => (
+      <div style={{ display: 'inline-flex', flexDirection: 'column' }}>
+        <input
+          placeholder="Put a question in here"
+          onChange={e => setPropertyValue('title', e.currentTarget.value)}
+          value={properties.title}
+        />
+        <input value={name} disabled />
+      </div>
+    )}
+  >
+    <input type="text" title="something" />
+  </RadField>
+)
 
+const App = () => {
   return (
     <div>
-      <button onClick={() => builder.add('button', null, 'Button')}>Add Button</button>
-      <div className="fields">
-        <Fields {...builder} />
-      </div>
-      <pre>{builder.toJSON(true)}</pre>
+      <RadForm initialFields={['text']}>
+        <TextInput />
+        <Preview />
+        <Debugger />
+      </RadForm>
     </div>
   )
 }

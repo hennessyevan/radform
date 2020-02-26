@@ -1,6 +1,14 @@
-# Rad Form (name is WIP)
+<div align="center">
+<h1>Rad Form (name is WIP)</h1>
 
-<div style="text-align: center;width: 100%;font-size: 128px">📻</div>
+<img
+    height="80"
+    width="80"
+    alt="radio"
+    src="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/apple/237/radio_1f4fb.png"
+  />
+
+  </div>
 
 <hr>
 
@@ -22,37 +30,55 @@ npm i radform
 yarn add radform
 ```
 
-Import radform into your code
+Start with a basic structure
 
-```ts
-import { useFormBuilder } from 'radform'
+```tsx
+import { RadForm } from 'radform'
 
 function MyFormBuilderComponent() {
-  const [Builder, actions] = useFormBuilder()
-
   return (
-    <div>
-      <Builder />
-      {/* View JSON output */}
-      <pre>{actions.toJSON()}</pre>
-    </div>
+    <RadForm>
+      {/* This field will be registered as "text-input" */}
+      <RadField name="text-input">
+        {/* Component to be used in the renderered form */}
+        <input type="text" />
+      </RadField>
+      <RadField name="text-input">
+        <button type="button" />
+      </RadField>
+    </RadForm>
   )
 }
 ```
 
-Adding a form element manually
+## RadForm
+
+This component collects all of the RadField configurations and injects the RadForm context.
+
+#### PropTable
 
 ```ts
-import { useFormBuilder } from 'radform'
-
-function MyFormBuilderComponent() {
-  const [Builder, actions] = useFormBuilder()
-
-  return (
-    <div>
-      <button onClick={() => actions.add('text')}>Add a text input!</button>
-      <Builder />
-    </div>
-  )
+type RadForm = {
+  initialFields?: string[]
+  children: (utilities) => ReactNode | ReactNode
 }
+```
+
+```ts
+// Each RadField represents a form element to be used in the builder
+type RadField = {
+  name: string
+  preview?: (bag: RadFieldBag) => ReactNode | ReactNode
+  children: ReactElement
+}
+```
+
+```ts
+// Used for rendering the Field Previews
+type Preview = ReactNode
+```
+
+```ts
+// Pretty prints the JSON output
+type Debugger = ReactNode
 ```

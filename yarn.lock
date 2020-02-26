@@ -4733,6 +4733,11 @@ qs@~6.5.2:
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.5.2.tgz#cb3ae806e8740444584ef154ce8ee98d403f3e36"
   integrity sha512-N5ZAX4/LxJmF+7wN74pUD6qAh9/wnvdQcjq9TZjevvXzSUo7bfmw91saqMjzGS2xq91/odN2dW/WOl7qQHNDGA==
 
+react-children-utilities@^2.0.7:
+  version "2.0.7"
+  resolved "https://registry.yarnpkg.com/react-children-utilities/-/react-children-utilities-2.0.7.tgz#ae0bdeba197e3cfdfe53eb835d8e5583ab59cb83"
+  integrity sha512-l2FM+qKgzSCnkHMFgte5Hes/FwpwmOUyUQkH3GqTx+dj9dIuGGXtgTla79jGijHFU1GURZ0NOufcc4LfaD+86g==
+
 react-dom@^16.12.0:
   version "16.12.0"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.12.0.tgz#0da4b714b8d13c2038c9396b54a92baea633fe11"

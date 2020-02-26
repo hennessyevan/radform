@@ -16,3 +16,7 @@ h3 {
   padding: 8px 24px;
   border: 1px solid #2d2d2d;
 }
+
+.card.active {
+  border-color: red;
+}

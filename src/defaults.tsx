@@ -3,7 +3,13 @@ import { FieldComponentProps } from './Builder'
 
 export function DefaultTextInput(field: FieldComponentProps<'text'>) {
   return (
-    <div className="card">
+    <div
+      {...field.properties}
+      className={`card${field.isActive ? ' active' : ''}`}
+      onClick={() => field.setActive(true)}
+      onBlur={() => field.setActive(false)}
+    >
+      <button onClick={() => field.remove(field._id)}>Remove</button>
       <input
         type="text"
         defaultValue={field.properties.label}
@@ -27,7 +33,16 @@ export function DefaultButton(field: FieldComponentProps<'button'>) {
       />
     </>
   ) : (
-    <button id={field._id} type="button" disabled {...field.properties} children={field.children} />
+    <div className="card">
+      <button onClick={() => field.remove(field._id)}>Remove</button>
+      <button
+        id={field._id}
+        type="button"
+        disabled
+        {...field.properties}
+        children={field.children}
+      />
+    </div>
   )
 }
 
