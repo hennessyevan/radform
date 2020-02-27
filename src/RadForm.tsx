@@ -1,22 +1,26 @@
+import produce from 'immer'
 import React, {
   createContext,
   ReactElement,
   ReactNode,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from 'react'
+import { ReactSortable } from 'react-sortablejs'
 import { v4 } from 'uuid'
-import produce from 'immer'
 
 type RadFormContext = {
   fieldMap: FieldMap
   fields: IdentifiableField[]
+  setFields: (fields: IdentifiableField[]) => void
 } & RadFormUtilities
 
 export const RadFormContext = createContext<RadFormContext>({
   fields: [],
   fieldMap: {},
+  setFields: () => {},
   register: () => {},
   remove: () => {},
   append: () => {},
@@ -25,12 +29,12 @@ export const RadFormContext = createContext<RadFormContext>({
 })
 
 type RadFormProps = {
-  initialFields?: string[]
+  initialFields?: string[] | Partial<IdentifiableField>[]
   children: ((utilities: RadFormUtilities) => ReactNode) | ReactNode
 }
 
 type Field = {
-  tagName: TagName
+  tagName: TagName | (string & {})
   type: 'root' | 'element'
   component: string
   properties: {
@@ -66,15 +70,44 @@ type RadFormUtilities = {
 export function RadForm({ children, initialFields = [] }: RadFormProps) {
   const [formFields, setFormFields] = useState<IdentifiableField[]>([])
   const [fieldMap, setFieldMap] = useState<FieldMap>({})
+  const initialized = useRef(false)
 
   useEffect(() => {
-    initialFields.forEach(initialField => {
-      returnBag.append(initialField)
-    })
+    if (!initialized.current) {
+      initialized.current = true
+      initialFields.forEach((initialField: string | Partial<IdentifiableField>) => {
+        // If initialField is a string initialize it with a RadFieldEntry
+        if (typeof initialField === 'string') {
+          returnBag.append(initialField)
+        } else if (typeof initialField === 'object') {
+          // If the initial field is an object and adheres to a Field type set it directly
+          const ownKeys = Object.getOwnPropertyNames(initialField)
+
+          // It must at least have a tagName
+          if (ownKeys.includes('tagName')) {
+            // Check if it has an _id otherwise create one
+            let _id: string
+            if (!ownKeys.includes('_id')) {
+              _id = v4()
+            }
+
+            // We're good! Append the fields directly
+            setFormFields(fields =>
+              fields.concat([
+                { properties: {}, _id, type: 'element', ...(initialField as IdentifiableField) },
+              ]),
+            )
+          } else if (__DEV__) {
+            console.warn('Initial fields must have a tagName')
+          }
+        }
+      })
+    }
   }, [fieldMap])
 
   const returnBag: RadFormContext = {
     fields: formFields,
+    setFields: setFormFields,
     fieldMap,
     setPropertyValue: _id => (property, value) => {
       setFormFields(fields =>
@@ -82,16 +115,13 @@ export function RadForm({ children, initialFields = [] }: RadFormProps) {
           const field = draft.find(currField => currField._id === _id)
 
           if (field) {
-            console.log(field.properties[property])
             field.properties[property] = value
           }
         }),
       )
     },
     remove: id => {
-      setFormFields(fields =>
-        fields.filter(field => ((field as unknown) as ReactElement)?.props?._id !== id),
-      )
+      setFormFields(fields => fields.filter(field => field._id !== id))
     },
     append: type => {
       const fieldTemplate = fieldMap[type]
@@ -124,12 +154,15 @@ export function RadForm({ children, initialFields = [] }: RadFormProps) {
         console.warn('RadField strictly requires 1 child')
       }
 
+      const tagName =
+        typeof field.children.type === 'function' ? field.children.type.name : field.children.type
+
       setFieldMap(fieldMap => ({
         ...fieldMap,
         [field.name]: {
           preview: field.preview,
           properties: field.children.props,
-          tagName: field.children.type as TagName,
+          tagName,
           type: 'element',
         },
       }))
@@ -171,33 +204,43 @@ export function RadField({ children, preview, name }: RadFieldProps) {
   return null
 }
 
-export function Preview() {
+export function Preview(props: JSX.IntrinsicElements['div']) {
   const context = useContext(RadFormContext)
 
   return (
-    <div>
-      {context.fields.map(field => {
-        const fieldTemplate = context.fieldMap[field.component]
+    <div {...props}>
+      <ReactSortable
+        list={context.fields.map(field => ({ ...field, id: field._id }))}
+        setList={context.setFields}
+      >
+        {context.fields.map(field => {
+          const fieldTemplate = context.fieldMap[field.component] as RadFieldEntry
 
-        if (fieldTemplate) {
-          const { preview } = fieldTemplate
+          if (fieldTemplate) {
+            const { preview } = fieldTemplate
 
-          return typeof preview === 'function'
-            ? React.cloneElement(
-                preview({
-                  name: field.component,
-                  remove: () => context.remove(field._id),
-                  setPropertyValue: (property, value) =>
-                    context.setPropertyValue(field._id)(property, value),
-                  properties: field.properties,
-                }) as ReactElement,
-                { ...field.properties, key: field._id },
-              )
-            : React.cloneElement(preview as ReactElement, { ...field.properties, key: field._id })
-        }
+            if (preview) {
+              return typeof preview === 'function'
+                ? React.cloneElement(
+                    preview({
+                      name: field.component,
+                      remove: () => context.remove(field._id),
+                      setPropertyValue: (property, value) =>
+                        context.setPropertyValue(field._id)(property, value),
+                      properties: field.properties,
+                    }) as ReactElement,
+                    { ...field.properties, key: field._id },
+                  )
+                : React.cloneElement(preview as ReactElement, {
+                    ...field.properties,
+                    key: field._id,
+                  })
+            }
+          }
 
-        return React.createElement(field.tagName, { ...field.properties, key: field._id })
-      })}
+          return React.createElement(field.tagName, { ...field.properties, key: field._id })
+        })}
+      </ReactSortable>
     </div>
   )
 }
@@ -206,4 +249,33 @@ export function Debugger() {
   const context = React.useContext(RadFormContext)
 
   return <pre>{JSON.stringify(context.toJSON(), null, 3)}</pre>
+}
+
+export function FieldPicker() {
+  const context = React.useContext(RadFormContext)
+
+  const fields = Object.entries(context.fieldMap)
+
+  return (
+    <div>
+      {fields.map(([name, field]) => (
+        <DefaultPickerElement
+          onClick={() => context.append(name)}
+          key={name}
+          {...field}
+          name={name}
+        />
+      ))}
+    </div>
+  )
+}
+
+function DefaultPickerElement(
+  props: RadFieldEntry & { name: string } & JSX.IntrinsicElements['div'],
+) {
+  return (
+    <div {...props}>
+      <span>{props.properties.title ?? props.name}</span>
+    </div>
+  )
 }
