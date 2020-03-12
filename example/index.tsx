@@ -6,7 +6,7 @@ import './styles.css'
 const TextInput = () => (
   <RadField
     name="text"
-    preview={({ name, setPropertyValue, properties, remove }) => (
+    preview={({ component, setPropertyValue, properties, remove }) => (
       <div className="card">
         <button onClick={remove}>Remove</button>
         <input
@@ -14,18 +14,18 @@ const TextInput = () => (
           onChange={e => setPropertyValue('title', e.currentTarget.value)}
           value={properties.title}
         />
-        <input value={name} disabled />
+        <input value={component} disabled />
       </div>
     )}
   >
-    <input type="text" title="something" />
+    <input type="text" title="textInput" />
   </RadField>
 )
 
 const ButtonInput = () => (
   <RadField
     name="button"
-    preview={({ name, setPropertyValue, properties, remove }) => (
+    preview={({ component, setPropertyValue, properties, remove }) => (
       <div className="card">
         <button onClick={remove}>Remove</button>
         <input
@@ -33,7 +33,7 @@ const ButtonInput = () => (
           onChange={e => setPropertyValue('title', e.currentTarget.value)}
           value={properties.title}
         />
-        <button children={name} disabled />
+        <button children={component} disabled />
       </div>
     )}
   >
@@ -53,7 +53,7 @@ const App = () => {
             },
             component: 'text',
             tagName: 'input',
-            _id: '843e21b4-44a3-462b-9e2b-144097a23bef',
+            id: '843e21b4-44a3-462b-9e2b-144097a23bef',
           },
         ]}
       >
@@ -61,9 +61,9 @@ const App = () => {
         <ButtonInput />
         <div className="editor">
           <Preview className="fields" />
-          <FieldPicker />
+          <FieldPicker className="picker" />
+          <Debugger className="debugger" />
         </div>
-        <Debugger />
       </RadForm>
     </div>
   )

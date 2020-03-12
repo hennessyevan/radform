@@ -4,24 +4,46 @@ h3 {
   line-height: 0;
 }
 
-.fields {
+.fields,
+.picker {
   max-width: 500px;
   margin: 16px;
   display: grid;
   grid-auto-flow: row;
+  grid-template-columns: 100%;
   grid-gap: 16px;
+  margin-bottom: auto;
+  padding: 16px;
 }
 
-.card {
+.fields {
+  background-color: #f02f5580;
+}
+
+.picker {
+  background-color: #e99f5580;
+  text-transform: capitalize;
+}
+
+.card,
+.picker-element {
+  background-color: #fff;
   display: inline-flex;
   flex-direction: column;
   border-radius: 8px;
   padding: 8px 24px;
   border: 1px solid #2d2d2d;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .editor {
   display: flex;
+}
+
+.debugger {
+  margin-left: 100px;
 }
 
 .card.active {
